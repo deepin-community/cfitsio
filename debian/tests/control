@@ -1,0 +1,2 @@
+Tests: testprog
+Depends: build-essential, libcfitsio-dev, pkg-config

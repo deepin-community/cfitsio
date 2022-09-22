@@ -1,0 +1,17 @@
+#!/bin/sh
+
+set -e
+
+CFLAGS="-O2 -Wall $(pkg-config --cflags cfitsio)"
+LDFLAGS=$(pkg-config --libs cfitsio)
+
+cp testprog.c $AUTOPKGTEST_TMP
+cd $AUTOPKGTEST_TMP
+
+cc $CFLAGS -o testprog.o -c testprog.c 2>&1
+cc -o testprog testprog.o $LDFLAGS 2>&1
+
+echo "build: OK"
+[ -x ./testprog ]
+./testprog
+echo "run: OK"

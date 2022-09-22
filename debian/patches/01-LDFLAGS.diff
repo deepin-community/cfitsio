@@ -1,0 +1,20 @@
+--- a/configure.in
++++ b/configure.in
+@@ -173,7 +173,7 @@ if test "x$EXT" != xcygwin && test "x$EX
+   fi
+ fi
+ AC_PROG_CC
+-LDFLAGS="$CFLAGS"
++#LDFLAGS="$CFLAGS"
+ LDFLAGS_BIN="$LDFLAGS"
+ 
+ if test "x$FC" = "xnone" ; then
+@@ -317,7 +317,7 @@ case $host in
+         AC_DEFINE(_LARGEFILE_SOURCE)
+         AC_DEFINE(_FILE_OFFSET_BITS,64)
+         # LDFLAGS used by utilities:
+-        LDFLAGS_BIN="$LDFLAGS_BIN -Wl,-rpath,\${CFITSIO_LIB}"
++        #LDFLAGS_BIN="$LDFLAGS_BIN -Wl,-rpath,\${CFITSIO_LIB}"
+ 	;;
+     *mingw32*)
+         AC_MSG_CHECKING([for large file support])
