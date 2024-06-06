@@ -1,6 +1,6 @@
 --- a/docs/fitsio.tex
 +++ b/docs/fitsio.tex
-@@ -6269,7 +6269,7 @@
+@@ -6264,7 +6264,7 @@
             0b01001 binary integer
  \end{verbatim}
      Note that integer constants are only allowed to be 32-bit, i.e.
@@ -9,7 +9,7 @@
      arithmetic expression where an integer would be appropriate.  Thus,
      they are distinct from bitmasks (which may be of arbitrary length,
      allow the "wildcard" bit, and may only be used in logical
-@@ -6562,7 +6562,7 @@
+@@ -6557,7 +6557,7 @@
        #EXPOSURE = gtioverlap('gtifile',#TSTART,#TSTOP)
  \end{verbatim}
  
@@ -20,16 +20,16 @@
      in each entry.  
 --- a/docs/cfitsio.tex
 +++ b/docs/cfitsio.tex
-@@ -3374,7 +3374,7 @@
+@@ -3371,7 +3371,7 @@
  
  For complex and double complex data types, \verb+nelements+ is the number
  of numerical pairs; the number of floats or doubles stored by
 -\+array+ must be \verb+2*nelements+.
 +\verb+array+ must be \verb+2*nelements+.
  
- Numerical data values are automatically scaled by the TSCALn and TZEROn
- keyword values (if they exist).
-@@ -9138,7 +9138,7 @@
+ For the logical data (TLOGICAL), the C storage type is a \verb+char+
+ single-byte character.  A FITS value of `\verb+T+'rue reads as 1 and
+@@ -9149,7 +9149,7 @@
        #EXPOSURE = gtioverlap('gtifile',#TSTART,#TSTOP)
  \end{verbatim}
  

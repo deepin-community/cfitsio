@@ -31,7 +31,7 @@
 \medskip
 \medskip
 \begin{center}
-{\Large Version 4.0 \\}
+{\Large Version 4.3 \\}
 \end{center}
 \bigskip
 \vskip 2.5cm
@@ -46,7 +46,7 @@ USA}
 \vfill
 \bigskip
 \begin{center}
-{\Large May 2021\\}
+{\Large Jul 2023\\}
 \end{center}
 \vfill
 \end{titlepage}
@@ -433,12 +433,7 @@ The Fortran wrappers in CFITSIO may be tested with the testf77
 program on Unix systems with:
 
 \begin{verbatim}
-    % f77 -o testf77 testf77.f -L. -lcfitsio -lnsl -lsocket
-  or
-    % f77 -f -o testf77 testf77.f -L. -lcfitsio    (under SUN O/S)
-  or
-    % f77 -o testf77 testf77.f -Wl,-L. -lcfitsio -lm -lnsl -lsocket (HP/UX)
-
+    % gfortran -o testf77 testf77.f -L. -lcfitsio -lz -lcurl
     % testf77 > testf77.lis
     % diff testf77.lis testf77.out
     % cmp testf77.fit testf77.std
@@ -1672,7 +1667,7 @@ status value is also returned as the value of the function itself.
 int fits_open_file / ffopen
     (fitsfile **fptr, char *filename, int iomode, > int *status)
 
-int fits_open_diskfile / ffdkopen
+int fits_open_diskfile / ffdkopn
     (fitsfile **fptr, char *filename, int iomode, > int *status)
 
 int fits_open_data / ffdopn
@@ -2097,24 +2092,48 @@ header.
 \end{verbatim}
 
 \begin{description}
-\item[3 ] Read a string-valued keyword and return the string length, the value string,
-    and/or the comment field.   The first routine, ffgksl, simply
-    returns the length of the character string value of the specified keyword.
-    The second routine, ffgsky, also returns up to maxchar characters
-    of the keyword value string, starting with the firstchar character,
-    and the keyword comment string (unless the input value of comm = NULL).
-    The valuelen argument returns the total length of the keyword value string
-    regardless of how much of the string is actually returned (which
-    depends on the value of the firstchar and maxchar arguments).
-    Note that the value character string argument must be allocated large enough to
-    also hold the null terminator at the end of the returned string.  These
-    routines support string keywords that use the CONTINUE convention to
-    continue long string values over multiple FITS header records.  Normally,
-    string-valued keywords have a maximum length of 68 characters, however,
-   CONTINUE'd string keywords may be arbitrarily long. \label{ffgksl} \label{ffgsky}
+\item[3 ] Read a string-valued keyword and return the string length, the value string, 
+    and/or the commment length and comment field.  These routines support the reading
+    of long string keyword values of arbitrary length which use the CONTINUE convention.
+    The first two routines, ffgkcsl and ffgskyc are the newer versions of the second two.  
+    They provide all the functionality of the older routines, 
+    but have the added capability of returning the length of comment strings (if any),
+    and reading multi-line comment strings of arbitrary length.  They are recommended
+    for use in the future.  ffgksl and ffgsky are maintained for backwards-compatibility.
+    
+    The first routine, ffgkcsl, simply returns the lengths of the character string value and
+    comment string (if any) of the specified keyword.  These lengths are particularly helpful
+    for allocating dynamic memory when retrieving the strings in the ffgskyc function.
+    To create an array large enough to hold the full string, one should allocate a size equal to
+    the returned length + 1 (for the trailing NULL).
+    
+    The second routine, ffgskyc, is for retrieving the value string and optional comment 
+    string, both of which may be of arbitrary length spreading over multiple lines with the
+    CONTINUE keyword convention.  It will return up to maxchar characters of the keyword value
+    string, starting with the firstchar character.  Similarly, maxcomchar determines the 
+    maximum number of characters to return for the comment string.  (The valuelen and comlen
+    arguments return the total length of their respective strings regardless of what is actually
+    returned as determined from the firstchar and max(com)char arguments.) If NULL is passed for 
+    either the value or comm string pointer, its max(com)char setting is irrelevant since
+    the corresponding string will not be returned.
+    
+    The ffgksl routine is the earlier version of ffgkcsl. It only returns the value string length and
+    not the comment string length.  ffgsky, the earlier version of ffgskyc, does return 
+    both the value string and comment string.  However it will only return up to the
+    first FLEN\_COMMENT-1 characters of the comment.  It can read comments across
+    multiple lines, but not of arbitrary length.   \label{ffgkcsl} \label{ffgskyc} \label{ffgksl} \label{ffgsky}
 \end{description}
 
 \begin{verbatim}
+  int fits_get_key_com_strlen / ffgkcsl
+      (fitsfile *fptr, const char *keyname, int *length, int *comlength,
+      int *status);
+      
+  int fits_read_string_key_com / ffgskyc
+      (fitsfile *fptr, const char *keyname, int firstchar, int maxchar,
+      int maxcomchar, char *value, int *valuelen, char *comm,
+      int *comlen, int *status);
+      
   int fits_get_key_strlen / ffgksl
       (fitsfile *fptr, const char *keyname, int *length, int *status);
 
@@ -2781,7 +2800,9 @@ quantization method is to be used.  The default algorithm is called
 ``SUBTRACTIVE\_DITHER\_1''.  A second variation called ``SUBTRACTIVE\_DITHER\_2''
 is also available, which does the same thing except that any pixels with a
 value of 0.0 are not dithered and instead the zero values are exactly
-preserved in the compressed image.  One may also turn off dithering
+preserved in the compressed image.  This is intended for the special case
+where ``bad pixels'' in the image have been artifically set to zero to indicate that they have no valid value.  It is not currently supported with HCOMPRESS, 
+and if requested while using HCOMPRESS, it will be replaced with ``SUBTRACTIVE\_DITHER\_1''.  One may also turn off dithering
 completely with the ``NO\_DITHER'' option, but this is not recommended
 because it can cause larger systematic errors in measurements of the
 position or brightness of objects in the compressed image.
@@ -3312,13 +3333,22 @@ spaces).  Trailing blank characters are not significant.
     with row 'firstrow'.  These rows will be appended to any existing
     rows in the output table.
    Note that the first row in a table is at row = 1. 
-   \label{ffcprw}
+
+   The \verb|fits_copy_selrows| form copies only selected rows to the output.
+   Which rows are transferred is determined by an array of flags, \verb|row_status[]|,
+   which could be returned by \verb|fits_find_rows()| or constructed by the user.
+   FITS row N is copied if \verb|row_status[N-first_row]| is non-zero.  
+   \label{ffcprw} \label{ffcpsr}
 \end{description}
 
 \begin{verbatim}
   int fits_copy_rows / ffcprw
       (fitsfile *infptr, fitsfile *outfptr, LONGLONG firstrow,
        LONGLONG nrows, > int *status);
+
+  int fits_copy_selrows / ffcpsr
+      (fitsfile *infptr, fitsfile *outfptr, LONGLONG firstrow,
+       LONGLONG nrows, char *row_status, > int *status);
 \end{verbatim}
 
 \begin{description}
@@ -3376,6 +3406,10 @@ For complex and double complex data types, \verb+nelements+ is the number
 of numerical pairs; the number of floats or doubles stored by
 \+array+ must be \verb+2*nelements+.
 
+For the logical data (TLOGICAL), the C storage type is a \verb+char+
+single-byte character.  A FITS value of `\verb+T+'rue reads as 1 and
+`\verb+F+' reads as 0; other non-FITS characters are preserved untranslated.
+
 Numerical data values are automatically scaled by the TSCALn and TZEROn
 keyword values (if they exist).
 
@@ -3406,7 +3440,17 @@ rows if required) and not the number of table cells.
    simply writes undefined pixel values to the column.  The fourth routine
    fills every column in the table with null values, in the specified
    rows (ignoring any columns that do not have a defined null value).
-   \label{ffpcl} \label{ffpcn} \label{ffpclu}
+
+   The \verb+fits_write_cols()+ variant writes multiple columns in a
+   single pass, which may be significantly faster for large data
+   files.  The ``chunk'' size is determined automatically based upon
+   CFITSIO's buffer sizes.  Only whole rows can be written, of any
+   type except TBIT or TSTRING.  For this variant, datatype, colnum,
+   array and nulval are arrays of the equivalent single-column
+   parameter (i.e. \verb+datatype[i]+ is the data type of column
+   \verb+i+). 
+
+   \label{ffpcl} \label{ffpcn} \label{ffpclu} \label{ffpcln}
 
 \begin{verbatim}
   int fits_write_col / ffpcl
@@ -3424,6 +3468,11 @@ rows if required) and not the number of table cells.
 
    int fits_write_nullrows / ffprwu
        (fitsfile *fptr, LONGLONG firstrow, LONGLONG nelements, > int *status)
+
+  int fits_write_cols / ffpcln
+      (fitsfile *fptr, int ncols, int *datatype, int *colnum, LONGLONG firstrow, 
+       LONGLONG nrows, DTYPE **array, DTYPE **nulval, int *status)
+
 \end{verbatim}
 
 \begin{description}
@@ -3463,7 +3512,16 @@ rows if required) and not the number of table cells.
     where w is the width in characters of the displayed values, m is the minimum
     number of digits displayed, and d is the number of digits to the right of the
     decimal.  The .m field is optional.
-   \label{ffgcv} \label{ffgcf}
+
+   The \verb+fits_read_cols()+ variant read multiple columns in a
+   single pass, which may be significantly faster for large data
+   files.  The ``chunk'' size is determined automatically based upon
+   CFITSIO's buffer sizes.  Only whole rows can be read, of any type
+   except TBIT or TSTRING.  For this variant, datatype, colnum, array
+   and nulval are arrays of the equivalent single-column parameter
+   (i.e. \verb+datatype[i]+ is the data type of column \verb+i+).
+
+   \label{ffgcv} \label{ffgcf} \label{ffgcvn}
 \end{description}
 
 \begin{verbatim}
@@ -3474,6 +3532,10 @@ rows if required) and not the number of table cells.
   int fits_read_colnull / ffgcf
       (fitsfile *fptr, int datatype, int colnum, LONGLONG firstrow, LONGLONG firstelem,
       LONGLONG nelements, DTYPE *array, char *nullarray, int *anynul, int *status)
+
+  int fits_read_cols / ffgcvn
+      (fitsfile *fptr, int ncols, int *datatype, int *colnum, LONGLONG firstrow, 
+       LONGLONG nrows, DTYPE **nulval, DTYPE **array, int **anynul, int *status)
 \end{verbatim}
 
 
@@ -3960,7 +4022,8 @@ The following utility routines may be useful for certain applications.
 \begin{description}
 \item[1 ] Return the revision number of the CFITSIO library.
     The revision number will be incremented with each new
-   release of CFITSIO. \label{ffvers}
+   release of CFITSIO. The 3 fields of the version string M.xx.yy
+   are converted to a float as: M + .01*xx + .0001*yy. \label{ffvers}
 \end{description}
 
 \begin{verbatim}
@@ -4943,7 +5006,8 @@ the array.  This should generally only be done during the
 initialization step or during the clean up step after the last set of
 data has been processed.  Extra FITS file I/O during the main
 processing loop of the work function can seriously degrade the speed of
-the program.
+the program.  Note that the behavior of the \verb|fits_iterate_data()|
+is undefined if narrays is zero.
 
 If variable-length array columns are being processed, then the iterator
 will operate on one row of the table at a time.  In this case the
@@ -7075,11 +7139,15 @@ parameters used in these routines.
 
 \subsection{Write Column Data Routines}
 
+This subsection describes specialized routines for writing data to
+FITS tables.  Please see section \ref{specialized-read-column-data}
+(``Read Column Data Routines'') for more information about how values
+are stored in C.
 
 \begin{description}
 \item[1 ] Write elements into an ASCII or binary table column (in the CDU).
     The data type of the array is implied by the suffix of the
-   routine name. \label{ffpcls}
+   routine name.  \label{ffpcls}
 \end{description}
 
 \begin{verbatim}
@@ -7163,7 +7231,7 @@ parameters used in these routines.
          LONGLONG offset, > int *status)
 \end{verbatim}
 
-\subsection{Read Column Data Routines}
+\subsection{Read Column Data Routines \label{specialized-read-column-data}}
 
 Two types of routines are provided to get the column data which differ
 in the way undefined pixels are handled.  The first set of routines
@@ -7209,6 +7277,11 @@ parameters used in these routines.
     (or = ' ' for ffgcvs) in which case no checking for undefined values will
     be performed. The anynul parameter is set to true if any of the returned
     elements are undefined. 
+
+    For the \verb+_log+ (logical) variant, the C storage type is a
+    \verb+char+ single-byte character.  A FITS value of `\verb+T+'rue
+    reads as 1 and `\verb+F+' reads as 0; other non-FITS characters 
+    are preserved untranslated.
 
     For the \verb+_str+ (string) variant the number
     of elements is the number of strings, and the caller must allocate storage
@@ -8686,6 +8759,7 @@ of the individual expressions.
 %%         heatools/help/calc_express.html
 %%         heatools/help/rowfilter.html
 %%         heatools/help/colfilter.html
+%%         heatools/help/binfilter.html
 %%         heatools/ftcalc/ftcalc.html
 %%         heatools/ftselect/ftselect.html
 %%         ftools/futils/tasks/fselect/fselect.hlp
@@ -8729,6 +8803,8 @@ log(negative), log10(negative), arccos(.gt. 1), arcsin(.gt. 1).
     "round down to int"  floor(x)   "round up to int"      ceil(x)
     "exponential"        exp(x)     "square root"          sqrt(x)
     "natural log"        log(x)     "common log"           log10(x)
+    "error function"     erf(x)     "complement of erf"    erfc(x)
+    "gamma function"     gamma(x)
     "modulus"            x % y      
     "bitwise AND"        x & y      "bitwise OR"           x | y
     "bitwise XOR"        x ^^ y     (bitwise operators are 32-bit int only)
@@ -8945,14 +9021,17 @@ usage. Also, the integer to real casts values to double precision:
     thus  results  in  another vector of boolean values indicating which
     elements of the two vectors are equal.
 
-    Eight functions are available that operate on a vector and return a
-    scalar result:
+    Several functions are available that operate on a vector.  All but
+    the last two return a scalar result:
 
 \begin{verbatim}
     "minimum"      MIN(V)          "maximum"               MAX(V)
     "average"      AVERAGE(V)      "median"                MEDIAN(V)
     "summation"    SUM(V)          "standard deviation"    STDDEV(V)
     "# of values"  NELEM(V)        "# of non-null values"  NVALID(V)
+    "# axes"       NAXIS(V)        "axis dimension"        NAXES(V,n)
+    "axis pos'n"   AXISELEM(V,n)   "vector element pos'n"  ELEMENTNUM(V)
+                                   "promote to array"      ARRAY(X,d)
 \end{verbatim}
     where V represents the name of a vector column or a manually
     constructed vector using curly brackets as described below.  The
@@ -8976,6 +9055,35 @@ usage. Also, the integer to real casts values to double precision:
 
     which will return TRUE if all elements  of  COL1  are  greater  than
     their corresponding elements in COL2.
+
+    The NAXIS(V) function returns the number of axes of the vector,
+    for example a 2D array would be NAXIS(V) == 2.  The NAXES(V,n)
+    function returns the dimension of axis n, for example a 4x2 array
+    would have NAXES(V,1) == 4.  The ELEMENTNUM(V) and AXISELEM(V,n)
+    functions return vectors of the same size as the input vector V.
+    ELEMENTNUM(V) returns the vector element position for each element
+    in the vector, starting from 1 in each row.  The AXISELEM(V,n)
+    function is similar but returns the element position of axis n
+    only.
+
+    The ARRAY(X,d) function promotes scalar value X to a vector (or
+    array) table element.  X may be any scalar-valued item, including
+    a column, an expression, or a constant value.  The resulting
+    vector or array will have the same scalar value replicated into
+    each element position.  This may be a useful way to construct
+    large arrays without using the cumbersome \{vector\} notation. The
+    dimensions of the new array are given by the second argument, d.
+    d can either be a single constant integer value, or a vector of up
+    to five dimensions of the form \{Nx,Ny,...\}.  Thus, ARRAY(TIME,4)
+    would promote TIME to be a 4-vector, and ARRAY(0, \{2,3,1\}) would
+    construct an array of all 0's with dimensions $2\times 3\times 1$.
+
+    A second form of ARRAY(X,d) can be used where X is a vector or
+    array, and the dimensions d merely change the dimensions of X
+    without changing the total number of vector elements.  This is a
+    way to re-dimension an existing array.  For example,
+    ARRAY(\{1,2,3,4\},{2,2}) would transform the 4-vector into a
+    $2\times 2$ array.
 
     To  specify  a  single  element  of  a  vector, give the column name
     followed by  a  comma-separated  list  of  coordinates  enclosed  in
@@ -9093,7 +9201,27 @@ usage. Also, the integer to real casts values to double precision:
     searches   for   TIMEZERO/I/F   keywords  in  the  current  and  GTI
     extensions, applying a relative time offset, if necessary.
 
-    A separate function, gtioverlap(a,b,c,d,e), computes the overlap
+    The related function, gtifind(a,b,c,d), is similar to gtifilter()
+    but instead of returning true/false, gtifind() returns the GTI
+    number that brackets the requested time sample.  gtifind() returns
+    the row number in the GTI table that matches the time sample, or
+    -1 if the time sample is not within any GTI.  gtifind() is
+    particularly useful when entries in a table must be categorized by
+    which GTI the fall within.  For example, if events in an event
+    list must be separated by good time interval.  The results of
+    gtifind() can be used with histogram binning techniques to bin an
+    event list by which GTI.
+    
+\begin{verbatim}
+      gtifind( "gtifile" , expr [, "STARTCOL", "STOPCOL" ] )
+\end{verbatim}
+
+    The requirements for specifying the gtifile are the same as for
+    gtifilter() as described above.  Like gtifilter(), the expr is
+    the time-like expression and is optional (defaulting to TIME).
+    The start and stop columns default to START and STOP.
+
+    The function, gtioverlap(a,b,c,d,e), computes the overlap
     between a user-requested time range and the entries in a GTI.  The
     cases of no overlap, partial overlap, or overlap of many GTIs
     within the user requested range are handled.  gtioverlap() is very
@@ -9385,13 +9513,28 @@ axes, respectively.  In cases where the column name could be confused
 with an arithmetic expression, enclose the column name in parentheses to
 force the name to be interpreted literally.
 
-Each column name may be followed by an equals sign and then the lower
-and upper range of the histogram, and the size of the histogram bins,
-separated by colons.  Spaces are allowed before and after the equals
-sign but not within the 'min:max:binsize' string.  The min, max and
-binsize values may be integer or floating point numbers, or they may be
-the names of keywords in the header of the table.  If the latter, then
-the value of that keyword is substituted into the expression.
+In addition to binning by a FITS column, any arbitrary calculator
+expression may be specified as well.  Usage of this form would appear
+as:
+
+\begin{verbatim}
+ [bin  Xcol(arbitrary expression)=min:max:binsize, ... ]
+\end{verbatim}
+
+The column name must still be specified, and is used to label
+coordinate axes of the resulting image.  The expression appears
+immediately after the name, enclosed in parentheses.  The expression
+may use any combination of columns, keywords, functions and constants
+and allowed by the CFITSIO calculator.
+
+The column name (and optional expression) may be followed by an equals
+sign and then the lower and upper range of the histogram, and the size
+of the histogram bins, separated by colons.  Spaces are allowed before
+and after the equals sign but not within the 'min:max:binsize' string.
+The min, max and binsize values may be integer or floating point
+numbers, or they may be the names of keywords in the header of the
+table.  If the latter, then the value of that keyword is substituted
+into the expression.
 
 Default values for the min, max and binsize quantities will be
 used if not explicitly given in the binning expression as shown
@@ -9415,6 +9558,13 @@ values in the column for the histogram min and max values.  The default
 binsize will be set to 1, or (max - min) / 10., whichever is smaller,
 so that the histogram will have at least 10 bins along each axis.
 
+Please note that if explicit min and max values (or TLMINn/TLMAXn keywords)
+are not present, then CFITSIO must check every value of the binned quantity
+in advance to determine the binning limits.  This is especially relevant 
+for binning expressions, which must be evaluated multiple times to determine
+the limits of the expression.  Thus, it is always advisable to specify 
+min and max limits where possible.
+
 A shortcut notation is allowed if all the columns/axes have the same
 binning specification.  In this case all the column names may be listed
 within parentheses, followed by the (single) binning specification, as
@@ -9425,26 +9575,31 @@ in:
     [bin (X,Y) = 5]
 \end{verbatim}
 
-The optional weighting factor is the last item in the binning specifier
-and, if present, is separated from the list of columns by a
+The optional weighting factor is the last item in the binning
+specifier and, if present, is separated from the list of columns by a
 semi-colon.  As the histogram is accumulated, this weight is used to
-incremented the value of the appropriated bin in the histogram.  If the
-weighting factor is not specified, then the default weight = 1 is
+incremented the value of the appropriated bin in the histogram.  If
+the weighting factor is not specified, then the default weight = 1 is
 assumed.  The weighting factor may be a constant integer or floating
 point number, or the name of a keyword containing the weighting value.
-Or the weighting factor may be the name of a table column in which case
-the value in that column, on a row by row basis, will be used.
+The weighting factor may also be the name of a table column in which
+case the value in that column, on a row by row basis, will be used.
+It may also be an expression, enclosed in parenthesis, in which case
+the weighting value will be evaluated for each binned row and applied
+accordingly.
 
 In some cases, the column or keyword may give the reciprocal of the
 actual weight value that is needed.  In this case, precede the weight
 keyword or column name by a slash '/' to tell CFITSIO to use the
-reciprocal of the value when constructing the histogram.
+reciprocal of the value when constructing the histogram.  An expression,
+enclosed in parentheses, may also appear after the slash, to
+indicate the reciprocal value of the expression.
 
-For  complex or commonly  used  histograms, one  can also  place its
-description  into  a  text  file and  import   it  into  the binning
-specification  using the  syntax [bin  @filename.txt].  The file's
-contents  can extend over   multiple lines, although  it must still
-conform to the  no-spaces rule  for the min:max:binsize syntax and each
+For complex or commonly used histograms, one can also place its
+description into a text file and import it into the binning
+specification using the syntax [bin @filename.txt].  The file's
+contents can extend over multiple lines, although it must still
+conform to the no-spaces rule for the min:max:binsize syntax and each
 axis specification must still be comma-separated.  Any lines in the
 external text file that begin with 2 slash characters ('//') will be
 ignored and may be used to add comments into the file.
@@ -9472,6 +9627,22 @@ ignored and may be used to add comments into the file.
                                        of the PHA column for the X axis,
                                        and 1000 bins in the range
                                        8000. to 8100. for the Y axis.
+
+    [bin pha, gti_num(gtifind())=1:2:1] - a 2-D image, where PHA is the
+                                       X axis and the Y axis is an expression
+                                       which evaluates to the GTI number, 
+                                       as determined using the
+                                       GTIFIND() function.
+
+    [bin time=0:4000:2000, HR( (LC2/LC1).lt.1.5 ? 1 : 2 )=1:2:1] - a 2-D
+                                       histogram which determines the number
+                                       of samples in two time bins between 0 and
+                                       4000 and separating hardness ratio, 
+                                       evaluated as (LC2/LC1), between less than
+                                       1.5 or greater than 1.5.  The ?: 
+                                       conditional function is used to decide
+                                       less (or greater) than 1.5 and assign
+                                       HR bin 1 or 2.
 
     [bin @binFilter.txt]             - Use the contents of the text file
                                        binFilter.txt for the binning
@@ -10259,6 +10430,7 @@ fits\_copy\_key           & \pageref{ffcpky} \\
 fits\_copy\_member    & \pageref{ffgmcp} \\
 fits\_copy\_pixlist2image & \pageref{copypixlist2image} \\
 fits\_copy\_rows &   \pageref{ffcprw} \\
+fits\_copy\_selrows &   \pageref{ffcpsr} \\
 fits\_create\_diskfile    & \pageref{ffinit} \\
 fits\_create\_file    & \pageref{ffinit} \\
 
@@ -10316,6 +10488,7 @@ fits\_get\_img\_param & \pageref{ffgipr} \\
 fits\_get\_img\_size & \pageref{ffgisz} \\
 fits\_get\_img\_type & \pageref{ffgidt} \\
 fits\_get\_inttype    & \pageref{ffinttyp} \\
+fits\_get\_key\_com\_strlen & \pageref{ffgkcsl} \\
 fits\_get\_key\_strlen & \pageref{ffgksl} \\
 fits\_get\_keyclass    & \pageref{ffgkcl} \\
 fits\_get\_keyname    & \pageref{ffgknm} \\
@@ -10394,6 +10567,7 @@ fits\_read\_col\_bit\_ & \pageref{ffgcx} \\
 fits\_read\_col\_TYP    & \pageref{ffgcvx} \\
 fits\_read\_colnull    & \pageref{ffgcf} \\
 fits\_read\_colnull\_TYP    & \pageref{ffgcfx} \\
+fits\_read\_cols        & \pageref{ffgcvn} \\
 fits\_read\_descript & \pageref{ffgdes} \\
 fits\_read\_descripts & \pageref{ffgdes} \\
 fits\_read\_errmsg    & \pageref{ffgmsg} \\
@@ -10418,6 +10592,7 @@ fits\_read\_pixnull & \pageref{ffgpxf} \\
 fits\_read\_record       & \pageref{ffgrec} \\
 fits\_read\_str         & \pageref{ffgcrd} \\
 fits\_read\_string\_key & \pageref{ffgsky} \\
+fits\_read\_string\_key\_com & \pageref{ffgskyc} \\
 fits\_read\_subset  & \pageref{ffgsv} \\
 fits\_read\_subset\_TYP  & \pageref{ffgsvx} \pageref{ffgsvx2}\\
 fits\_read\_subsetnull\_TYP & \pageref{ffgsfx} \pageref{ffgsfx2} \\
@@ -10481,6 +10656,7 @@ fits\_write\_col\_TYP     & \pageref{ffpcls} \\
 fits\_write\_col\_null      & \pageref{ffpclu} \\
 fits\_write\_colnull      & \pageref{ffpcn} \\
 fits\_write\_colnull\_TYP & \pageref{ffpcnx} \\
+fits\_write\_cols         & \pageref{ffpcln} \\
 \end{tabular}
 \newpage
 \begin{tabular}{lr}
@@ -10544,6 +10720,7 @@ ffcpht   & \pageref{ffcpht} \\
 ffcpimg  & \pageref{ffcpimg} \\
 ffcpky       & \pageref{ffcpky} \\
 ffcprw      &   \pageref{ffcprw} \\
+ffcpsr      &   \pageref{ffcpsr} \\
 ffcrhd     & \pageref{ffcrhd} \\
 ffcrim     & \pageref{ffcrim} \\
 ffcrow    & \pageref{ffcrow} \\
@@ -10553,7 +10730,7 @@ ffdelt    & \pageref{ffdelt} \\
 ffdhdu     & \pageref{ffdhdu} \\
 ffdkey     & \pageref{ffdkey} \\
 ffdkinit  & \pageref{ffinit} \\
-ffdkopen      & \pageref{ffopen} \\
+ffdkopn      & \pageref{ffopen} \\
 ffdopn      & \pageref{ffopen} \\
 ffdrec  & \pageref{ffdrec} \\
 ffdrow  & \pageref{ffdrow} \\
@@ -10592,6 +10769,7 @@ ffgcno     & \pageref{ffgcno} \\
 ffgcrd         & \pageref{ffgcrd} \\
 ffgcv        & \pageref{ffgcv} \\
 ffgcv\_    & \pageref{ffgcvx} \\
+ffgcvn       & \pageref{ffgcvn} \\
 ffgcx     & \pageref{ffgcx} \\
 ffgdes & \pageref{ffgdes} \\
 ffgdess & \pageref{ffgdes} \\
@@ -10613,6 +10791,7 @@ ffgiet & \pageref{ffgidt} \\
 ffgipr & \pageref{ffgipr} \\
 ffgisz & \pageref{ffgisz} \\
 ffgkcl      & \pageref{ffgkcl} \\
+ffgkcsl & \pageref{ffgkcsl} \\
 ffgkey      & \pageref{ffgkey} \\
 ffgkls  & \pageref{ffgkls} \\
 ffgksl  & \pageref{ffgksl} \\
@@ -10645,6 +10824,7 @@ ffgrsz    & \pageref{ffgrsz} \\
 ffgsdt        & \pageref{ffdt2s} \\
 ffgsf\_ &  \pageref{ffgsfx} \pageref{ffgsfx2} \\
 ffgsky  &  \pageref{ffgsky} \\
+ffgskyc  & \pageref{ffgskyc} \\
 ffgstm        & \pageref{ffdt2s} \\
 ffgstr         & \pageref{ffgcrd} \\
 ffgsv  & \pageref{ffgsv} \\
@@ -10711,6 +10891,7 @@ ffp2d\_   & \pageref{ffp2dx} \\
 ffp3d\_   & \pageref{ffp3dx} \\
 ffpcks   & \pageref{ffpcks} \\
 ffpcl         & \pageref{ffpcl} \\
+ffpcln         & \pageref{ffpcln} \\
 ffpcls     & \pageref{ffpcls} \\
 ffpcl\_     & \pageref{ffpclx} \\
 ffpclu      & \pageref{ffpclu} \\
