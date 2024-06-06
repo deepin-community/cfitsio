@@ -1,3 +1,2 @@
 version=4
-opts=dversionmangle=s/0$// \
-    https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c cfitsio-(.+)\.tar\.gz
+https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c cfitsio-(.+)\.tar\.gz

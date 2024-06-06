@@ -6,13 +6,13 @@ Uploaders: Aurelien Jarno <aurel32@debian.org>
 Build-Depends: debhelper-compat (= 13)
 Build-Depends-Arch: gfortran, cfortran, zlib1g-dev, libbz2-dev, libcurl4-gnutls-dev
 Build-Depends-Indep: hevea, latex2html, texlive
-Standards-Version: 4.6.0
+Standards-Version: 4.6.2
 Homepage: https://heasarc.gsfc.nasa.gov/fitsio/fitsio.html
 Vcs-Browser: https://salsa.debian.org/debian-astro-team/cfitsio
 Vcs-Git: https://salsa.debian.org/debian-astro-team/cfitsio.git
 Rules-Requires-Root: no
 
-Package: libcfitsio9
+Package: libcfitsio10
 Architecture: any
 Section: libs
 Multi-Arch: same
@@ -32,7 +32,7 @@ Package: libcfitsio-dev
 Section: libdevel
 Architecture: any
 Multi-Arch: same
-Depends: libcfitsio9 (= ${binary:Version}), ${misc:Depends}
+Depends: libcfitsio10 (= ${binary:Version}), ${misc:Depends}
 Replaces: libcfitsio3-dev (<< 3.340-3)
 Breaks: libcfitsio3-dev (<< 3.340-3)
 Recommends: libcfitsio-doc

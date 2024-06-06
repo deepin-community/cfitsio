@@ -1,8 +1,7 @@
 01-LDFLAGS.diff
 02-system-cfortran.patch
 03-off_t.diff
-04-pkgconfig-private.patch
 06-spelling-errors.diff
 08-hurd.diff
+09-add-support-for-loongarch64.patch
 10-latex.diff
-add-sunway-support.patch

@@ -1,14 +1,56 @@
-cfitsio (4.0.0.1-1+dde) UNRELEASED; urgency=medium
+cfitsio (4.3.1-1) unstable; urgency=medium
 
-  * update
+  * New upstream version:
+    - Update symbols file.
 
- -- Debian Astronomy Maintainers <debian-astro-maintainers@lists.alioth.debian.org>  Tue, 14 Jun 2022 01:51:45 -0400
+ -- Aurelien Jarno <aurel32@debian.org>  Wed, 31 Jan 2024 19:24:33 +0100
 
-cfitsio (4.0.0.1-1+dde) unstable; urgency=medium
+cfitsio (4.3.0-2) unstable; urgency=medium
 
-  * Add sunway support.
+  * Add patch from Dandan Zhang to add support for loong64 architecture.
 
- -- Miao Changwei <miaochangwei@uniontech.com>  Thu, 19 May 2022 12:56:28 +0800
+ -- Aurelien Jarno <aurel32@debian.org>  Thu, 14 Sep 2023 22:31:39 +0200
+
+cfitsio (4.3.0-1) unstable; urgency=medium
+
+  * New upstream version:
+    - Update symbols file.
+  * Drop debian/patches/04-pkgconfig-private.patch (obsolete).
+
+ -- Aurelien Jarno <aurel32@debian.org>  Sun, 03 Sep 2023 17:20:07 +0200
+
+cfitsio (4.2.0-3) unstable; urgency=medium
+
+  * Update debian/patches/01-LDFLAGS.diff to build the binaries with the
+    correct LDFLAGS.
+
+ -- Aurelien Jarno <aurel32@debian.org>  Fri, 23 Dec 2022 11:33:54 +0100
+
+cfitsio (4.2.0-2) unstable; urgency=medium
+
+  * Upload to unstable.
+  * Bump Standards-Version to 4.6.2 (no changes).
+
+ -- Aurelien Jarno <aurel32@debian.org>  Sat, 17 Dec 2022 15:06:19 +0100
+
+cfitsio (4.2.0-1) experimental; urgency=medium
+
+  * New upstream version:
+    - Refresh debian/patches/01-LDFLAGS.diff.
+    - Refresh debian/patches/04-pkgconfig-private.patch.
+    - Rename libcfitsio9 into libcfitsio10.
+
+ -- Aurelien Jarno <aurel32@debian.org>  Mon, 28 Nov 2022 21:12:54 +0100
+
+cfitsio (4.1.0-1) unstable; urgency=medium
+
+  * New upstream version:
+    - Refresh debian/patches/10-latex.diff.
+  * Fix debian/watch file to work with the new versioning scheme.
+  * Update 03-off_t.diff to add Hurd support.  Closes: #1007932.
+  * Bump Standards-Version to 4.6.1 (no changes).
+
+ -- Aurelien Jarno <aurel32@debian.org>  Mon, 16 May 2022 22:18:00 +0200
 
 cfitsio (4.0.0-1) unstable; urgency=medium
 
