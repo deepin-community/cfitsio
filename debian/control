@@ -4,9 +4,13 @@ Priority: optional
 Maintainer: Debian Astronomy Maintainers <debian-astro-maintainers@lists.alioth.debian.org>
 Uploaders: Aurelien Jarno <aurel32@debian.org>
 Build-Depends: debhelper-compat (= 13)
-Build-Depends-Arch: gfortran, cfortran, zlib1g-dev, libbz2-dev, libcurl4-gnutls-dev
+Build-Depends-Arch: cfortran,
+                    gfortran,
+                    libbz2-dev,
+                    libcurl4-gnutls-dev,
+                    zlib1g-dev
 Build-Depends-Indep: hevea, latex2html, texlive
-Standards-Version: 4.6.2
+Standards-Version: 4.7.2
 Homepage: https://heasarc.gsfc.nasa.gov/fitsio/fitsio.html
 Vcs-Browser: https://salsa.debian.org/debian-astro-team/cfitsio
 Vcs-Git: https://salsa.debian.org/debian-astro-team/cfitsio.git
@@ -17,7 +21,7 @@ Architecture: any
 Section: libs
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
 Description: shared library for I/O with FITS format data files
  FITS (Flexible Image Transport System) is a data format most used in
  astronomy. cfitsio is a library of ANSI C routines for reading and
@@ -32,7 +36,7 @@ Package: libcfitsio-dev
 Section: libdevel
 Architecture: any
 Multi-Arch: same
-Depends: libcfitsio10 (= ${binary:Version}), ${misc:Depends}
+Depends: cfortran, libcfitsio10 (= ${binary:Version}), ${misc:Depends}
 Replaces: libcfitsio3-dev (<< 3.340-3)
 Breaks: libcfitsio3-dev (<< 3.340-3)
 Recommends: libcfitsio-doc
@@ -48,7 +52,11 @@ Description: library for I/O with FITS format data files (development files)
 
 Package: libcfitsio-bin
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Section: science
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Breaks: fitsverify (<< 4.22+cfitsio)
+Replaces: fitsverify (<< 4.22+cfitsio)
+Provides: fitsverify
 Description: CFITSIO based utilities
  FITS (Flexible Image Transport System) is a data format most used in
  astronomy. cfitsio is a library of ANSI C routines for reading and
@@ -57,7 +65,7 @@ Description: CFITSIO based utilities
  programmers.
  .
  This package contains utility programs, based on CFITSIO, namely
- fitscopy, fpack and funpack.
+ fitscopy, fitsverify, fpack, funpack and imcopy.
 
 Package: libcfitsio-doc
 Architecture: all
@@ -78,3 +86,11 @@ Description: documentation for CFITSIO
  in html, postscript and text formats, and contains documentation on
  how to use the library in your programs. It also contains example
  source files that demonstrate the use of CFITSIO.
+
+Package: fitsverify
+Architecture: all
+Section: oldlibs
+Multi-Arch: foreign
+Depends: libcfitsio-bin, ${misc:Depends}
+Description: transitional dummy package
+ This is a transitional dummy package, it can be safely removed.

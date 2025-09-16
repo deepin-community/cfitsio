@@ -1,1 +1,5 @@
+usr/bin/cookbook
+usr/bin/smem
+usr/bin/speed
 usr/bin/testprog
+usr/lib/*/libcfitsio.la

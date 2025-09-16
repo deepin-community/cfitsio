@@ -1,0 +1,21 @@
+#!/bin/bash
+set -e
+
+if [ "$AUTOPKGTEST_TMP" = "" ] ; then
+  AUTOPKGTEST_TMP=`mktemp -d /tmp/${pkg}-test.XXXXXX`
+  trap "rm -rf $AUTOPKGTEST_TMP" 0 INT QUIT ABRT PIPE TERM
+fi
+
+cp -a /usr/lib/eso-midas/*/test/prim/*.fits $AUTOPKGTEST_TMP
+
+cd $AUTOPKGTEST_TMP
+gunzip -r *
+
+# These files do not seem to work well, removing these
+rm -f dss_test1.fits dss_test2.fits image_M12c.fits timmi2.fits
+
+echo "Test - Run fitsverify, check for errors"
+fitsverify -q -e *.fits
+rm -f ./*.fits
+echo "================================="
+echo "PASS"

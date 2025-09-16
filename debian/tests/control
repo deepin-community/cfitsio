@@ -1,2 +1,6 @@
+Tests: fitsverify
+Depends: eso-midas-testdata, libcfitsio-bin
+Restrictions: allow-stderr
+
 Tests: testprog
 Depends: build-essential, libcfitsio-dev, pkg-config

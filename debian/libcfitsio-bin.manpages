@@ -1,4 +1,5 @@
 debian/fitscopy.1
+debian/fitsverify.1
 debian/fpack.1
 debian/funpack.1
 debian/imcopy.1

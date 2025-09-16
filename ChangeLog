@@ -1,6 +1,84 @@
                    Log of Changes Made to CFITSIO
                    
-Version 4.3.1 - Nov 2023
+Version 4.6.2 - Mar 2025
+
+  - Updated autotools configure script to use AM_MAINTAINER_MODE;
+    disables automatic regeneration of the build system unless
+    configure is invoked with '--enable-maintainer-mode'
+
+Version 4.6.1 - Mar 2025
+
+  - Updated CMake configuration to use GNUInstallDirs module and to
+    use CMAKE_INSTALL_LIBDIR and CMAKE_INSTALL_INCLUDEDIR; fixes bug
+    in 4.6.0 that led to an empty 'includedir' in cfitsio.pc
+
+  - Updated autotools config files
+
+Version 4.6.0 - Mar 2025
+
+  - Improved the empty primary data test performed in fits_open_file.
+  
+  - Correction to eval_defs.h typedefs to allow for compilation on old
+    gcc compilers.
+    
+  - The fitsverify utility tool now distinguishes between alternate
+    coordinate systems when testing positions of WCSAXES keywords.
+    
+  - Updates made for greater C23 compatibility as required for gcc-15.
+  
+  - Possible memory vulnerabilities patched.  Our thanks
+    to Doyensec for reporting this.
+       
+  - Fix to a possible heap buffer overflow in a utility tool.  Our 
+    thanks to TeamH4C for reporting this.
+ 
+  - Negative size parameter vulnerability patched in utility
+    tool.  Our thanks to TeamH4C for reporting this.
+                   
+Version 4.5.0 - Aug 2024
+
+  - Conversion of CFITSIO configure/build files to better conform with
+    automake and libtool.
+
+  - Bug fix for case of bit column output in string format on clang
+    compilers with high optimization.
+    
+  - Added compiler macro support to improve builds on loongarch64 and on
+    Gnu/Hurd kernels. 
+  
+  - Bug fix to fitsverify utility.
+                   
+Version 4.4.1 - Jun 2024
+
+  - Removed NOSA license and restored previous license file
+
+Version 4.4.0 - Feb 2024
+
+  - Reorganization of helper utility code; added fitsverify
+
+  - CMakeLists.txt: Changed install location of cfitsio-targets.cmake
+    to conform with the one listed in cfitsio-config.cmake.in (i.e.
+    including the extra "cfitsio" subdir of lib/cmake).
+
+  - calculator functions that read GTIs do more correct validity
+    checking of GTI input files
+  
+  - fits_insert_rows now works if input table starts with both no rows
+    and no columns
+
+  - Can now write internal memory files of size > 2^32 directly to a
+    gzip-compressed output file.
+    
+  - Added support for unsigned long long types to fits_update_key.
+  
+  - Added ability for Windows builds to handle UTF-8 needed for reading
+    filenames with non-ASCII characters.
+    
+  - Added 2-byte int test to speed.c utility.
+  
+  - Made fix to http file handler to expand the allowed URL length.
+  
+Version 4.3.1 - Nov 2023 (patch release)
 
   - Patch fix needed for modify and delete keyword functions to fully
     conform with v4.3.0 long string keyword read/write enhancements. 

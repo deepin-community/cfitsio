@@ -1,0 +1,158 @@
+.TH fitsverify "1" "October 2024" "CFITSIO version 4.5.0" "User Commands"
+.SH NAME
+fitsverify \- test if file conform to the FITS format
+.SH SYNOPSIS
+.B fitsverify
+[\fIOPTION\fR]... \fIFILE\fR...
+.br
+.B fitsverify
+[\fIOPTION\fR]... \fI@FILELIST\fR
+.SH DESCRIPTION
+.PP
+.B fitsverify
+is a utility program designed to verify that files conform to the
+specifications of the FITS Standard document (known as the NASA/Science Office
+of Standards and Technology 'Definition of the Current  FITS Standard',
+document number, NOST 100-2.0, available online at
+https://fits.gsfc.nasa.gov/).  The input filename template may contain wildcard
+characters, in which case all matching files will be tested.  Alternatively,
+the name of an ASCII text file containing a list of file names, one per line,
+may be entered preceded by an '@' character.
+.SH OPTIONS
+.PP
+Flags must be separate and appear before filenames.
+.TP
+.TP
+\fB\-H\fR
+Test ESO HIERARCH keywords
+.TP
+\fB\-l\fR
+List all header keywords.
+.TP
+\fB\-q\fR
+Quiet, print one-line pass/fail summary per file.
+.TP
+\fB\-e\fR
+Only test for error conditions, don't issue warnings.
+.TP
+\fB\-h\fR
+Show help.
+.SH "ERROR CONDITIONS"
+.IP \[bu] 2
+Mandatory keyword not present or out of order
+.IP \[bu]
+Mandatory keyword has wrong datatype or illegal value
+.IP \[bu]
+END header keyword is not present
+.IP \[bu]
+Sum of table column widths is inconsistent with NAXIS1 value
+.IP \[bu]
+BLANK keyword present in image with floating-point datatype
+.IP \[bu]
+TNULLn keyword present for floating-point binary table column
+.IP \[bu]
+Bit column has non-zero fill bits or is not left adjusted
+.IP \[bu]
+ASCII TABLE column contains illegal value inconsistent with TFORMn
+.IP \[bu]
+Address to a variable length array not within the data heap
+.IP \[bu]
+Extraneous bytes in the FITS file following the last HDU
+.IP \[bu]
+Mandatory keyword values not expressed in fixed format
+.IP \[bu]
+Mandatory keyword duplicated elsewhere in the header
+.IP \[bu]
+Header contains illegal ASCII character (not ASCII 32 \- 126)
+.IP \[bu]
+Keyword name contains illegal character
+.IP \[bu]
+Keyword value field has illegal format
+.IP \[bu]
+Value and comment fields not separated by a slash character
+.IP \[bu]
+END keyword not filled with blanks in columns 9 \- 80
+.IP \[bu]
+Reserved keyword with wrong datatype or illegal value
+.IP \[bu]
+EXTEND not present in the primary array if there are extensions
+.IP \[bu]
+BLOCKED, if present, not among the first 36 keywords
+.IP \[bu]
+XTENSION keyword in the primary array
+.IP \[bu]
+Column related keyword (TFIELDS, TTYPEn,TFORMn, etc.) in an image
+.IP \[bu]
+SIMPLE, EXTEND, or BLOCKED keyword in any extension
+.IP \[bu]
+BSCALE, BZERO, BUNIT, BLANK, DATAMAX, DATAMIN keywords in a table
+.IP \[bu]
+Image WCS keywords (CTYPEn, CRPIXn, CRVALn, etc.) in a table
+.IP \[bu]
+Table WCS keywords (TCTYPn, TCRPXn, TCRVLn, etc.) in an image
+.IP \[bu]
+TDIMn or THEAP keyword in an ASCII table
+.IP \[bu]
+TBCOLn keyword in a Binary table
+.IP \[bu]
+THEAP keyword in a binary table that has PCOUNT = 0
+.IP \[bu]
+XTENSION, TFORMn, TDISPn or TDIMn value contains leading space(s)
+.IP \[bu]
+Index of any WCS keyword (CRPIXn, CRVALn, etc.) greater than value of WCSAXES
+.IP \[bu]
+Index of any table column descriptor keyword (TTYPEn, TFORMn, etc.)
+greater than value of TFIELDS
+.IP \[bu]
+TSCALn or TZEROn present for an ASCII, logical, or Bit column
+.IP \[bu]
+TDISPn value is inconsistent with the column datatype
+.IP \[bu]
+Length of a variable length array greater than the maximum  length as given by
+the TFORMn keyword
+.IP \[bu]
+Logical column contains illegal value not equal to 'T', 'F', or 0
+.IP \[bu]
+Character string column contains non-ASCII text character
+.IP \[bu]
+Header fill bytes not all blanks
+.IP \[bu]
+Data fill bytes not all blanks in ASCII tables or all zeros in any other
+type of HDU
+.IP \[bu]
+Gaps between defined ASCII table columns contain characters with
+ASCII value > 127
+.SH "WARNING CONDITIONS"
+.IP \[bu] 2
+SIMPLE = F
+.IP \[bu]
+Presence of deprecated keywords BLOCKED or EPOCH
+.IP \[bu]
+2 HDUs have identical EXTNAME, EXTVER, and EXTLEVEL values
+.IP \[bu]
+BSCALE or TSCALn value = 0.
+.IP \[bu]
+BLANK OR TNULLn value exceeds the legal range
+.IP \[bu]
+TFORMn has 'rAw' format and r is not a multiple of w
+.IP \[bu]
+DATE = 'dd/mm/yy' and yy is less than 10 (Y2K problem??)
+.IP \[bu]
+Index of any WCS keyword (CRPIXn, CRVALn, etc.) greater than
+value of NAXIS, if the WCSAXES keyword is not present
+.IP \[bu]
+Duplicated keyword (except COMMENT, HISTORY, blank, etc.)
+.IP \[bu]
+Column name (TTYPEn) does not exist or contains characters
+other than letter, digit and underscore
+.IP \[bu]
+Calculated checksum inconsistent with CHECKSUM or DATASUM keyword
+.SH "AUTHOR"
+HEASARC at NASA/GSFC
+.SH "EXIT STATUS"
+The exit status of
+.B fitsverify
+is the sum of the number of errors and warnings issued, capped at 255. It
+returns 0 if no errors or warnings have been found.
+.SH "SEE ALSO"
+\fBfitscopy\fP(1).

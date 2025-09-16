@@ -613,6 +613,7 @@ libcfitsio.so.10 libcfitsio10 #MINVER#
  ffmkym@Base 4.2.0~
  ffmkys@Base 4.2.0~
  ffmkyu@Base 4.2.0~
+ ffmkyuj@Base 4.4.0~
  ffmnam@Base 4.2.0~
  ffmnhd@Base 4.2.0~
  ffmrec@Base 4.2.0~
@@ -911,6 +912,7 @@ libcfitsio.so.10 libcfitsio10 #MINVER#
  ffukym@Base 4.2.0~
  ffukys@Base 4.2.0~
  ffukyu@Base 4.2.0~
+ ffukyuj@Base 4.4.0~
  ffupch@Base 4.2.0~
  ffupck@Base 4.2.0~
  ffuptf@Base 4.2.0~
