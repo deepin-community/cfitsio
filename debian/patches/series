@@ -5,3 +5,4 @@
 08-hurd.diff
 09-add-support-for-loongarch64.patch
 10-latex.diff
+0001-feat-deepin-add-sw64-support.patch

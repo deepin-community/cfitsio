@@ -1,0 +1,26 @@
+From 42e369e2b8840e0eaa81317a8b2da18824e69244 Mon Sep 17 00:00:00 2001
+From: hudeng <hudeng@deepin.org>
+Date: Tue, 16 Sep 2025 18:01:46 +0800
+Subject: [PATCH] feat: deepin add sw64 support
+
+---
+ fitsio2.h | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/fitsio2.h b/fitsio2.h
+index d2369cf..fef3dc3 100644
+--- a/fitsio2.h
++++ b/fitsio2.h
+@@ -78,7 +78,8 @@ extern int Fitsio_Pthread_Status;
+ /*   This block of code should match a similar block in fitsio.h  */
+ /*   and the block of code at the beginning of f77_wrap.h         */
+ 
+-#if defined(__alpha) && ( defined(__unix__) || defined(__NetBSD__) )
++//#if defined(__alpha) && ( defined(__unix__) || defined(__NetBSD__) )
++#if ( defined(__alpha) || defined(__sw_64__) ) && ( defined(__unix__) || defined(__NetBSD__) )
+                                   /* old Dec Alpha platforms running OSF */
+ #define BYTESWAPPED TRUE
+ #define LONGSIZE 64
+-- 
+2.50.1
+
