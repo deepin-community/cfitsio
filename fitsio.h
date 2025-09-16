@@ -34,11 +34,11 @@ SERVICES PROVIDED HEREUNDER."
 #ifndef _FITSIO_H
 #define _FITSIO_H
 
-#define CFITSIO_VERSION 4.3.1
+#define CFITSIO_VERSION 4.6.2
 /* Minor and micro numbers must not exceed 99 under current method
    of version representataion in ffvers(). */
-#define CFITSIO_MICRO 1
-#define CFITSIO_MINOR 3
+#define CFITSIO_MICRO 2
+#define CFITSIO_MINOR 6
 #define CFITSIO_MAJOR 4
 #define CFITSIO_SONAME 10
 
@@ -72,7 +72,7 @@ SERVICES PROVIDED HEREUNDER."
 #  define _MIPS_SZLONG 64
 #endif
 
-#if defined(linux) || defined(__APPLE__) || defined(__sgi)
+#if defined(__GLIBC__) || defined(__APPLE__) || defined(__sgi)
 #  include <sys/types.h>  /* apparently needed on debian linux systems */
 #endif                    /* to define off_t                           */
 
@@ -86,10 +86,10 @@ SERVICES PROVIDED HEREUNDER."
 /* on whether _LARGEFILE_SOURCE is defined in sys/feature_tests.h  */
 /* (at least on Solaris platforms using cc)  */
 
-/*  Debian systems require: "(defined(linux) && defined(__off_t_defined))" */
+/*  Debian systems require: "(defined(__GLIBC__) && defined(__off_t_defined))" */
 /*  the mingw-w64 compiler requires: "(defined(__MINGW32__) && defined(_OFF_T_DEFINED))" */
 #if defined(_OFF_T) \
-    || (defined(linux) && defined(__off_t_defined)) \
+    || (defined(__GLIBC__) && defined(__off_t_defined)) \
     || (defined(__MINGW32__) && defined(_OFF_T_DEFINED)) \
     || defined(_MIPS_SZLONG) || defined(__APPLE__) || defined(_AIX)
 #    define OFF_T off_t
@@ -1034,6 +1034,7 @@ int CFITS_API ffukys(fitsfile *fptr, const char *keyname, const char *value, con
 int CFITS_API ffukls(fitsfile *fptr, const char *keyname, const char *value, const char *comm, int *status);
 int CFITS_API ffukyl(fitsfile *fptr, const char *keyname, int value, const char *comm, int *status);
 int CFITS_API ffukyj(fitsfile *fptr, const char *keyname, LONGLONG value, const char *comm, int *status);
+int CFITS_API ffukyuj(fitsfile *fptr, const char *keyname, ULONGLONG value, const char *comm, int *status);
 int CFITS_API ffukyf(fitsfile *fptr, const char *keyname, float value, int decim, const char *comm,
           int *status);
 int CFITS_API ffukye(fitsfile *fptr, const char *keyname, float value, int decim, const char *comm,
@@ -1061,6 +1062,7 @@ int CFITS_API ffmkys(fitsfile *fptr, const char *keyname, const char *value, con
 int CFITS_API ffmkls(fitsfile *fptr, const char *keyname, const char *value, const char *comm,int *status);
 int CFITS_API ffmkyl(fitsfile *fptr, const char *keyname, int value, const char *comm, int *status);
 int CFITS_API ffmkyj(fitsfile *fptr, const char *keyname, LONGLONG value, const char *comm, int *status);
+int CFITS_API ffmkyuj(fitsfile *fptr, const char *keyname, ULONGLONG value, const char *comm, int *status);
 int CFITS_API ffmkyf(fitsfile *fptr, const char *keyname, float value, int decim, const char *comm,
           int *status);
 int CFITS_API ffmkye(fitsfile *fptr, const char *keyname, float value, int decim, const char *comm,

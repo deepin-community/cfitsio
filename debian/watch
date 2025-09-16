@@ -1,2 +1,2 @@
 version=4
-https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c cfitsio-(.+)\.tar\.gz
+https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/ cfitsio-(.+)\.tar\.gz

@@ -1,8 +1,104 @@
-cfitsio (4.3.1-1deepin1) unstable; urgency=medium
+cfitsio (4.6.2-2deepin1) unstable; urgency=medium
 
-  * feat: add sw64 support
+  * revert t64.
 
- -- hudeng <hudeng@deepin.org>  Tue, 16 Sep 2025 18:02:47 +0800
+ -- Tianyu Chen <sweetyfish@deepin.org>  Wed, 09 Apr 2025 17:14:04 +0800
+
+cfitsio (4.6.2-2) unstable; urgency=medium
+
+  * autopkgtest/fitsverify: do not test image_M12c.fits, it is not compatible
+    with new checks introduced in version 4.6.0
+
+ -- Aurelien Jarno <aurel32@debian.org>  Sat, 05 Apr 2025 00:05:23 +0200
+
+cfitsio (4.6.2-1) unstable; urgency=medium
+
+  * Fix debian/watch
+  * New upstream version (closes: #1096426)
+  * Remove 01-link-fpack-and-funpack-with-lm.patch (upstreamed)
+  * Bump Standards-Version to 4.7.2 (no changes)
+  * Rewrite debian/copyright in Machine-readable format
+
+ -- Aurelien Jarno <aurel32@debian.org>  Fri, 04 Apr 2025 23:07:03 +0200
+
+cfitsio (4.5.0-5) unstable; urgency=medium
+
+  * Import the autopkgtest from the fitsverify package.
+
+ -- Aurelien Jarno <aurel32@debian.org>  Wed, 23 Oct 2024 22:58:56 +0200
+
+cfitsio (4.5.0-4) unstable; urgency=medium
+
+  * Try to support cross-compiling.
+  * Drop now useless debian/libcfitsio10t64.lintian-overrides.
+  * Set DEB_BUILD_MAINT_OPTIONS = hardening=+all to make lintian happier.
+  * Update the fitsverify(1) manpage using the one from the fitsverify
+    package.
+  * Set libcfitsio-bin section to science.
+  * Update libcfitsio-bin description to include newer binaries.
+  * Take over the fitsverify binary and change it into a transitional package.
+    Closes: #1085050.
+
+ -- Aurelien Jarno <aurel32@debian.org>  Sat, 19 Oct 2024 17:36:25 +0200
+
+cfitsio (4.5.0-3) unstable; urgency=medium
+
+  * debian/patches/02-system-cfortran.patch: update to no install cfortran.h.
+    Closes: #1085011.
+  * debian/control: add a dependency on cfortran to libcfitsio-dev.
+
+ -- Aurelien Jarno <aurel32@debian.org>  Sun, 13 Oct 2024 11:35:42 +0200
+
+cfitsio (4.5.0-2) unstable; urgency=medium
+
+  * debian/rules: drop override_dh_auto_install-arch stanza.
+
+ -- Aurelien Jarno <aurel32@debian.org>  Fri, 11 Oct 2024 19:38:14 +0200
+
+cfitsio (4.5.0-1) unstable; urgency=medium
+
+  * New upstream version:
+    - Drop debian/patches/01-LDFLAGS.diff (obsolete).
+    - Drop debian/patches/03-off_t.diff (upstreamed).
+    - Drop debian/patches/08-hurd.diff (upstreamed).
+    - Drop debian/patches/09-add-support-for-loongarch64.patch (upstreamed).
+    - Add debian/patcheS/01-link-fpack-and-funpack-with-lm.patch to fix build
+      failure due to libtool defaulting to link_all_deplibs=no.
+    - debian/rules: drop override_dh_auto_build-arch stanza.
+    - debian/libcfitsio-bin.install: install fitsverify binary.
+    - debian/not-installed: add usr/bin/{cookbook,smem,speed} and
+      usr/lib/*/libcfitsio.la.
+  * debian/fpack.1: fix synopsys.
+  * debian/fitsverify.1: new man page.
+
+ -- Aurelien Jarno <aurel32@debian.org>  Thu, 10 Oct 2024 23:52:09 +0200
+
+cfitsio (4.4.1-2) unstable; urgency=medium
+
+  * Update autopkgtest following the move of testprog.c to utilities.
+  * Bump Standards-Version to 4.7.0 (no changes).
+
+ -- Aurelien Jarno <aurel32@debian.org>  Thu, 20 Jun 2024 19:57:52 +0200
+
+cfitsio (4.4.1-1) unstable; urgency=medium
+
+  * New upstream version:
+    - Refresh debian/patches/02-system-cfortran.patch.
+    - Drop debian/patches/06-spelling-errors.diff (upstreamed).
+    - Drop debian/patches/10-latex.diff (upstreamed).
+    - Update symbols file.
+    - Rename README into README.md in debian/libcfitsio-doc.docs.
+    - Update paths to example in debian/libcfitsio-doc.examples.
+  * Drop redundant build-depends introduced in version 4.3.1-1.1.
+
+ -- Aurelien Jarno <aurel32@debian.org>  Wed, 19 Jun 2024 23:15:15 +0200
+
+cfitsio (4.3.1-1.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Rename libraries for 64-bit time_t transition.  Closes: #1063111
+
+ -- Benjamin Drung <bdrung@debian.org>  Fri, 01 Mar 2024 11:57:08 +0000
 
 cfitsio (4.3.1-1) unstable; urgency=medium
 

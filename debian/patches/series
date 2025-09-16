@@ -1,8 +1,1 @@
-01-LDFLAGS.diff
 02-system-cfortran.patch
-03-off_t.diff
-06-spelling-errors.diff
-08-hurd.diff
-09-add-support-for-loongarch64.patch
-10-latex.diff
-0001-feat-deepin-add-sw64-support.patch

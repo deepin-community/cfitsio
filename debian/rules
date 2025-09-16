@@ -1,6 +1,9 @@
 #!/usr/bin/make -f
 
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 export DEB_CFLAGS_MAINT_APPEND = -Wall
+
+include /usr/share/dpkg/pkg-info.mk
 
 %:
 	dh $@
@@ -12,14 +15,10 @@ override_dh_auto_clean:
 	rm -rf docs/cfitsio docs/fitsio docs/quick
 
 override_dh_auto_configure-arch:
-	dh_auto_configure -- --enable-reentrant --with-bzip2
+	dh_auto_configure -- --host=$(DEB_HOST_GNU_TYPE) --enable-reentrant --with-bzip2
 
 override_dh_auto_configure-indep:
 	# Nothing to do
-
-override_dh_auto_build-arch:
-	dh_auto_build -- shared
-	dh_auto_build -- fitscopy fpack funpack imcopy testprog
 
 override_dh_auto_build-indep:
 	for i in cfitsio fitsio quick ; do \
@@ -41,10 +40,9 @@ ifeq (,$(findstring nocheck,$(DEB_BUILD_OPTIONS)))
 	LD_LIBRARY_PATH=$(CURDIR) $(CURDIR)/testprog
 endif
 
-override_dh_auto_install-arch:
-	dh_auto_install
-	install -d -m 755 $(CURDIR)/debian/tmp/usr/bin
-	install -m 755 fitscopy fpack funpack imcopy $(CURDIR)/debian/tmp/usr/bin
-
 override_dh_auto_install-indep:
 	# Nothing to do
+
+override_dh_gencontrol-indep:
+	dh_gencontrol -pfitsverify -- -v4.22+cfitsio$(DEB_VERSION)
+	dh_gencontrol -Nfitsverify
