@@ -1,3 +1,9 @@
+cfitsio (4.6.2-2deepin2) unstable; urgency=medium
+
+  * feat: add sw64 support
+
+ -- hudeng <hudeng@deepin.org>  Tue, 16 Sep 2025 20:16:40 +0800
+
 cfitsio (4.6.2-2deepin1) unstable; urgency=medium
 
   * revert t64.
